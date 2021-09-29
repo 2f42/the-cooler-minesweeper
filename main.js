@@ -9,8 +9,9 @@ const display = {
 };
 
 const game = {
-	width: 10,
-	height: 10
+	width: 0,
+	height: 0,
+	tiles: []
 };
 
 
@@ -96,7 +97,12 @@ function drawGrid () {
 }
 
 
-window.onload = function () {
+function initGame (width, height) {
+	game.width = width;
+	game.height = height;
+
+	game.tiles = Array(width*height);
+
 	canvas.width = display.marginLeft*2 + (display.cellWidth+display.cellPadding)*game.width + display.cellPadding;
 	canvas.height = display.marginTop*2 + (display.cellWidth+display.cellPadding)*game.height + display.cellPadding;
 
@@ -104,8 +110,13 @@ window.onload = function () {
 
 	drawBorder();
 	drawGrid();
+}
+
+
+window.onload = function () {
+	initGame(9, 9);
 };
 
 window.addEventListener("keypress", e => { display.cellWidth++; window.onload(); });
 canvas.addEventListener("contextmenu", e => { e.preventDefault(); } );
-canvas.addEventListener("mousedown", e => { console.log(canvasToGrid(e.offsetX, e.offsetY)); });
+canvas.addEventListener("mousedown", handleMouse);
