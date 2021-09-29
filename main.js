@@ -15,22 +15,22 @@ const game = {
 
 
 function canvasToGrid (x, y) {
-	var adjustedX = x - display.marginLeft - display.cellPadding;
-	var adjustedY = y - display.marginTop - display.cellPadding;
+	// convert a canvas coordinate to a grid index
 
-	var cellTotalSize = display.cellWidth+display.cellPadding;
+	let adjustedX = x - display.marginLeft - display.cellPadding;
+	let adjustedY = y - display.marginTop - display.cellPadding;
+
+	let cellTotalSize = display.cellWidth+display.cellPadding;
 
 	if (adjustedX < 0 || adjustedX >= game.width * cellTotalSize - display.cellPadding ||
 		adjustedY < 0 || adjustedY >= game.height * cellTotalSize - display.cellPadding) {
 
-		console.log("outside Grid");
 		return -1;
 	}
 
 	if (adjustedX%cellTotalSize >= display.cellWidth ||
 		adjustedY%cellTotalSize >= display.cellWidth) {
 
-		console.log("on borders");
 		return -1;
 	}
 
@@ -38,21 +38,58 @@ function canvasToGrid (x, y) {
 }
 
 
+function cellOnTopEdge (index) {
+	return index < game.width;
+}
+
+function cellOnBottomEdge (index) {
+	return index >= (game.height - 1)*game.width;
+}
+
+function cellOnLeftEdge (index) {
+	return index % game.width == 0;
+}
+
+function cellOnRightEdge (index) {
+	return index % game.width == game.width - 1;
+}
+
+
+function handleMouse (e) {
+	e.preventDefault();
+
+	// if in grid, you Clicked a Cell
+	let gridIndex = canvasToGrid(e.offsetX, e.offsetY);
+
+	if (gridIndex != -1) {
+		let msg = e.button == 0 ? "left " : e.button == 1 ? "middle " : "right ";
+		msg += "clicked cell " + gridIndex;
+		console.log(msg);
+		console.log(
+			cellOnTopEdge(gridIndex) ? " " : "↑",
+			cellOnLeftEdge(gridIndex) ?  " " : "←",
+			cellOnRightEdge(gridIndex) ?  " " : "→",
+			cellOnBottomEdge(gridIndex) ?  " " : "↓"
+		);
+	}
+}
+
+
 function drawBorder () {
-	var ctx = canvas.getContext("2d");
+	let ctx = canvas.getContext("2d");
 	ctx.strokeStyle = "white";
-	var cellSize = display.cellWidth+display.cellPadding;
-	ctx.strokeRect(display.marginLeft, display.marginTop, cellSize*game.width+display.cellPadding, display.cellSize*game.height+display.cellPadding);
+	let cellSize = display.cellWidth+display.cellPadding;
+	ctx.strokeRect(display.marginLeft, display.marginTop, cellSize*game.width+display.cellPadding, cellSize*game.height+display.cellPadding);
 }
 
 function drawGrid () {
-	var ctx = canvas.getContext("2d");
+	let ctx = canvas.getContext("2d");
 	ctx.strokeStyle = "grey";
 
 	for (x=0;x<game.width;x++) {
-		var cellX = display.marginLeft+display.cellPadding+x*(display.cellWidth+display.cellPadding);
+		let cellX = display.marginLeft+display.cellPadding+x*(display.cellWidth+display.cellPadding);
 		for (y=0;y<game.height;y++) {
-			var cellY = display.marginTop+display.cellPadding+y*(display.cellWidth+display.cellPadding);
+			let cellY = display.marginTop+display.cellPadding+y*(display.cellWidth+display.cellPadding);
 			ctx.strokeRect(cellX, cellY, display.cellWidth, display.cellWidth);
 		}
 	}
