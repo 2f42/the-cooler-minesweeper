@@ -70,4 +70,5 @@ window.onload = function () {
 };
 
 window.addEventListener("keypress", e => { display.cellWidth++; window.onload(); });
+canvas.addEventListener("contextmenu", e => { e.preventDefault(); } );
 canvas.addEventListener("mousedown", e => { console.log(canvasToGrid(e.offsetX, e.offsetY)); });
