@@ -232,6 +232,11 @@ function addMines (n, excluded) {
 				break;
 			}
 		}
+
+		if (excluded.length + mines.length >= game.width*game.height) {
+			window.alert("you chose to put down too many mines, so the total number of mines has gone down (and you will win after clicking once, because what else did you think would happen)");
+			break;
+		}
 	}
 
 	mines.forEach(mine => {
