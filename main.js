@@ -58,32 +58,55 @@ function cellOnRightEdge (index) {
 }
 
 
-function countNeighouringMines (index) {
+function getNeighbours (index) {
 	let left = !cellOnLeftEdge(index);
 	let right = !cellOnRightEdge(index);
 	let top = !cellOnTopEdge(index);
 	let bottom = !cellOnBottomEdge(index);
 
-	let count = 0;
+	let neighbours = [];
 
 	if (left && top)
-		count += game.tiles[index - game.width - 1] == "m" ? 1 : 0;
+		neighbours.push(index - game.width - 1);
 	if (left && bottom)
-		count += game.tiles[index + game.width - 1] == "m" ? 1 : 0;
+		neighbours.push(index + game.width - 1);
 	if (right && top)
-		count += game.tiles[index - game.width + 1] == "m" ? 1 : 0;
+		neighbours.push(index - game.width + 1);
 	if (right && bottom)
-		count += game.tiles[index + game.width + 1] == "m" ? 1 : 0;
+		neighbours.push(index + game.width + 1);
 	if (left)
-		count += game.tiles[index - 1] == "m" ? 1 : 0;
+		neighbours.push(index - 1);
 	if (right)
-		count += game.tiles[index + 1] == "m" ? 1 : 0;
+		neighbours.push(index + 1);
 	if (top)
-		count += game.tiles[index - game.width] == "m" ? 1 : 0;
+		neighbours.push(index - game.width);
 	if (bottom)
-		count += game.tiles[index + game.width] == "m" ? 1 : 0;
+		neighbours.push(index + game.width);
 
+	return neighbours;
+}
+
+function countNeighouringMines (index) {
+	let count = 0;
+	getNeighbours(index).forEach(i => {
+		count += game.tiles[i] == "m" ? 1 : 0;
+	});
 	return count;
+}
+
+
+function revealCell (index) {
+	game.revealed[index] = true;
+	if (game.tiles[index] == "m") {
+		window.alert("oh no YOU're deAD!");
+	} else if (game.tiles[index] == " ") {
+		if (countNeighouringMines(index) == 0) {
+			getNeighbours(index).forEach(i => {
+				if (!game.revealed[i])
+					revealCell(i);
+			});
+		}
+	}
 }
 
 
@@ -105,8 +128,7 @@ function handleMouse (e) {
 		);
 
 		if (e.button == 0 && !game.marked[gridIndex] && !game.revealed[gridIndex]) {
-			game.revealed[gridIndex] = true;
-			console.log("REVEALED!");
+			revealCell(gridIndex);
 		} else if (e.button == 2 && !game.revealed[gridIndex]) {
 			game.marked[gridIndex] = (game.marked[gridIndex] + 1) % 3;
 			console.log("flagged");
@@ -182,20 +204,22 @@ function addMines (n) {
 	for (i=0;i<n;i++) {
 		while (1) {
 			let m = Math.floor(Math.random()*game.width*game.height);
-			if (!(m in mines)) {
+			if (!mines.includes(m)) {
+				console.log(m);
 				mines.push(m);
 				break;
 			}
 		}
 	}
 
+	console.log(mines);
 	mines.forEach(mine => {
 		game.tiles[mine] = "m";
 	});
 }
 
 
-function initGame (width, height) {
+function initGame (width, height, mines) {
 	game.width = width;
 	game.height = height;
 
@@ -203,7 +227,7 @@ function initGame (width, height) {
 	game.revealed = Array(width*height).fill(false);
 	game.marked = Array(width*height).fill(0);
 
-	addMines(10);
+	addMines(mines);
 
 	canvas.width = display.marginLeft*2 + (display.cellWidth+display.cellPadding)*game.width + display.cellPadding;
 	canvas.height = display.marginTop*2 + (display.cellWidth+display.cellPadding)*game.height + display.cellPadding;
@@ -213,7 +237,7 @@ function initGame (width, height) {
 
 
 window.onload = function () {
-	initGame(9, 9);
+	initGame(9, 9, 10);
 };
 
 window.addEventListener("keypress", e => { display.cellWidth++; window.onload(); });
