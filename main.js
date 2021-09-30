@@ -225,7 +225,6 @@ function addMines (n, excluded) {
 		while (1) {
 			let m = Math.floor(Math.random()*game.width*game.height);
 			if (!mines.includes(m) && !excluded.includes(m)) {
-				console.log(m);
 				mines.push(m);
 				break;
 			}
@@ -236,6 +235,15 @@ function addMines (n, excluded) {
 	mines.forEach(mine => {
 		game.tiles[mine] = "m";
 	});
+}
+
+
+function startGame() {
+	let w = parseInt(document.getElementById("width").value);
+	let h = parseInt(document.getElementById("height").value);
+	let m = parseInt(document.getElementById("mines").value);
+	console.log(w, h, m);
+	initGame(w, h, m);
 }
 
 
@@ -257,9 +265,9 @@ function initGame (width, height, mines) {
 
 
 window.onload = function () {
-	initGame(9, 9, 10);
+	startGame();
 };
 
-window.addEventListener("keypress", e => { display.cellWidth++; window.onload(); });
+//window.addEventListener("keypress", e => { display.cellWidth++; window.onload(); });
 canvas.addEventListener("contextmenu", e => { e.preventDefault(); } );
 canvas.addEventListener("mousedown", handleMouse);
