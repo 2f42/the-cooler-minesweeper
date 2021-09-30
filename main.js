@@ -96,6 +96,14 @@ function countNeighouringMines (index) {
 	return count;
 }
 
+function countNeighbouringFlags (index) {
+	let count = 0;
+	getNeighbours(index).forEach(i => {
+		count += game.marked[i] == 1 ? 1 : 0;
+	});
+	return count;
+}
+
 
 function revealCell (index) {
 	game.revealed[index] = true;
@@ -108,6 +116,15 @@ function revealCell (index) {
 					revealCell(i);
 			});
 		}
+	}
+}
+
+function chordCell (index) {
+	if (countNeighbouringFlags(index) == countNeighouringMines(index)) {
+		getNeighbours(index).forEach(i => {
+			if (!game.revealed[i] && game.marked[i] != 1)
+				revealCell(i);
+		});
 	}
 }
 
@@ -126,8 +143,11 @@ function handleMouse (e) {
 			addMines(game.mines, excluded);
 		}
 
-		if (e.button == 0 && !game.marked[gridIndex] && !game.revealed[gridIndex]) {
-			revealCell(gridIndex);
+		if (e.button == 0 && !game.marked[gridIndex]) {
+			if (game.revealed[gridIndex])
+				chordCell(gridIndex);
+			else
+				revealCell(gridIndex);
 		} else if (e.button == 2 && !game.revealed[gridIndex]) {
 			game.marked[gridIndex] = (game.marked[gridIndex] + 1) % 3;
 		}
@@ -159,15 +179,17 @@ function drawGrid (ctx) {
 			let cellIndex = x + y*game.width;
 			let fill = false;
 
-			if (!game.revealed[cellIndex] && game.marked[cellIndex] == 0) {
-				ctx.fillStyle = "grey";
-				fill = true;
-			} else if (game.marked[cellIndex] == 1) {
-				ctx.fillStyle = "red";
-				fill = true;
-			} else if (game.marked[cellIndex] == 2) {
-				ctx.fillStyle = "green";
-				fill = true;
+			if (!game.revealed[cellIndex]) {
+				if (game.marked[cellIndex] == 0) {
+					ctx.fillStyle = "grey";
+					fill = true;
+				} else if (game.marked[cellIndex] == 1) {
+					ctx.fillStyle = "red";
+					fill = true;
+				} else if (game.marked[cellIndex] == 2) {
+					ctx.fillStyle = "green";
+					fill = true;
+				}
 			}
 
 			if (fill) {
