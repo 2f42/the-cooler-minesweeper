@@ -11,6 +11,8 @@ const display = {
 const game = {
 	width: 0,
 	height: 0,
+	mines: 0,
+	firstClick: false,
 	tiles: [],
 	revealed: [],
 	marked: []
@@ -117,21 +119,17 @@ function handleMouse (e) {
 	let gridIndex = canvasToGrid(e.offsetX, e.offsetY);
 
 	if (gridIndex != -1) {
-		let msg = e.button == 0 ? "left " : e.button == 1 ? "middle " : "right ";
-		msg += "clicked cell " + gridIndex;
-		console.log(msg);
-		console.log(
-			cellOnTopEdge(gridIndex) ? " " : "↑",
-			cellOnLeftEdge(gridIndex) ?  " " : "←",
-			cellOnRightEdge(gridIndex) ?  " " : "→",
-			cellOnBottomEdge(gridIndex) ?  " " : "↓"
-		);
+		if (e.button == 0 && game.firstClick) {
+			game.firstClick = false;
+			let excluded = getNeighbours(gridIndex);
+			excluded.push(gridIndex);
+			addMines(game.mines, excluded);
+		}
 
 		if (e.button == 0 && !game.marked[gridIndex] && !game.revealed[gridIndex]) {
 			revealCell(gridIndex);
 		} else if (e.button == 2 && !game.revealed[gridIndex]) {
 			game.marked[gridIndex] = (game.marked[gridIndex] + 1) % 3;
-			console.log("flagged");
 		}
 	}
 
@@ -199,12 +197,12 @@ function draw () {
 }
 
 
-function addMines (n) {
+function addMines (n, excluded) {
 	let mines = [];
 	for (i=0;i<n;i++) {
 		while (1) {
 			let m = Math.floor(Math.random()*game.width*game.height);
-			if (!mines.includes(m)) {
+			if (!mines.includes(m) && !excluded.includes(m)) {
 				console.log(m);
 				mines.push(m);
 				break;
@@ -222,12 +220,12 @@ function addMines (n) {
 function initGame (width, height, mines) {
 	game.width = width;
 	game.height = height;
+	game.mines = mines;
 
 	game.tiles = Array(width*height).fill(" ");
 	game.revealed = Array(width*height).fill(false);
 	game.marked = Array(width*height).fill(0);
-
-	addMines(mines);
+	game.firstClick = true;
 
 	canvas.width = display.marginLeft*2 + (display.cellWidth+display.cellPadding)*game.width + display.cellPadding;
 	canvas.height = display.marginTop*2 + (display.cellWidth+display.cellPadding)*game.height + display.cellPadding;
