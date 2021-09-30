@@ -117,6 +117,9 @@ function revealCell (index) {
 			});
 		}
 	}
+	if (game.revealed.filter(Boolean).length == game.width*game.height - game.mines) {
+		window.alert("you win?");
+	}
 }
 
 function chordCell (index) {
