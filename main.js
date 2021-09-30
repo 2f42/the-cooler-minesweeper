@@ -117,9 +117,6 @@ function revealCell (index) {
 			});
 		}
 	}
-	if (game.revealed.filter(Boolean).length == game.width*game.height - game.mines) {
-		window.alert("you win?");
-	}
 }
 
 function chordCell (index) {
@@ -219,6 +216,9 @@ function draw () {
 
 	drawBorder(ctx);
 	drawGrid(ctx);
+	if (game.revealed.filter(Boolean).length == game.width*game.height - game.mines) {
+		window.alert("you win?");
+	}
 }
 
 
@@ -234,7 +234,6 @@ function addMines (n, excluded) {
 		}
 	}
 
-	console.log(mines);
 	mines.forEach(mine => {
 		game.tiles[mine] = "m";
 	});
@@ -245,7 +244,6 @@ function startGame() {
 	let w = parseInt(document.getElementById("width").value);
 	let h = parseInt(document.getElementById("height").value);
 	let m = parseInt(document.getElementById("mines").value);
-	console.log(w, h, m);
 	initGame(w, h, m);
 }
 
