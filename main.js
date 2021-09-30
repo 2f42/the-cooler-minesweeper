@@ -154,8 +154,13 @@ function drawGrid (ctx) {
 				ctx.fillRect(cellX, cellY, display.cellWidth, display.cellWidth);
 			} else {
 				ctx.fillStyle = "white";
-				let n = countNeighouringMines(cellIndex)
-				ctx.fillText(n ? n : " ", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
+
+				if (game.tiles[cellIndex] == " ") {
+					let n = countNeighouringMines(cellIndex);
+					ctx.fillText(n ? n : " ", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
+				} else {
+					ctx.fillText(game.tiles[cellIndex], cellX+display.cellWidth/2, cellY+display.cellWidth/2);
+				}
 			}
 		}
 	}
