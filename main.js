@@ -13,6 +13,7 @@ const game = {
 	height: 0,
 	mines: 0,
 	firstClick: false,
+	dead: true,
 	tiles: [],
 	revealed: [],
 	marked: []
@@ -109,6 +110,7 @@ function revealCell (index) {
 	game.revealed[index] = true;
 	if (game.tiles[index] == "m") {
 		window.alert("oh no YOU're deAD!");
+		game.dead = true;
 	} else if (game.tiles[index] == " ") {
 		if (countNeighouringMines(index) == 0) {
 			getNeighbours(index).forEach(i => {
@@ -135,7 +137,7 @@ function handleMouse (e) {
 	// if in grid, you Clicked a Cell
 	let gridIndex = canvasToGrid(e.offsetX, e.offsetY);
 
-	if (gridIndex != -1) {
+	if (gridIndex != -1 && !game.dead) {
 		if (e.button == 0 && game.firstClick) {
 			game.firstClick = false;
 			let excluded = getNeighbours(gridIndex);
@@ -234,6 +236,7 @@ function addMines (n, excluded) {
 		}
 
 		if (excluded.length + mines.length >= game.width*game.height) {
+			game.mines = mines.length;
 			window.alert("you chose to put down too many mines, so the total number of mines has gone down (and you will win after clicking once, because what else did you think would happen)");
 			break;
 		}
@@ -257,6 +260,8 @@ function initGame (width, height, mines) {
 	game.width = width;
 	game.height = height;
 	game.mines = mines;
+
+	game.dead = false;
 
 	game.tiles = Array(width*height).fill(" ");
 	game.revealed = Array(width*height).fill(false);
