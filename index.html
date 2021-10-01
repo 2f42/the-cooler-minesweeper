@@ -20,10 +20,18 @@
 		<form>
 			<label for="width">Width:</label><br />
 			<input type="number" id="width" name="width" value=9><br /><br />
+
 			<label for="height">Height:</label><br />
 			<input type="number" id="height" name="height" value=9><br /><br />
+
 			<label for="mines">Mines:</label><br />
 			<input type="number" id="mines" name="mines" value=10><br /><br />
+
+			<label for="variant">Variant</label><br />
+			<select id="variant" name="variant">
+				<option value="classic" selected>Classic</option>
+				<option value="knight">Knightsweeper</option>
+			</select><br /><br />
 		</form>
 
 		<button onclick="startGame()">Start New Game</button>

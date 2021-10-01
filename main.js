@@ -16,7 +16,9 @@ const game = {
 	firstClick: false,
 	dead: true,
 
-	tiles: []
+	tiles: [],
+
+	getNeighbours: getNeighboursClassic
 };
 
 
@@ -61,6 +63,10 @@ function canvasToGrid (x, y) {
 	return toGrid(Math.floor(adjustedX/cellTotalSize), Math.floor(adjustedY/cellTotalSize));
 }
 
+function isInGrid (x, y) {
+	return x >= 0 && x < game.width && y >= 0 && y < game.height;
+}
+
 
 function cellOnTopEdge (index) {
 	return index < game.width;
@@ -79,7 +85,7 @@ function cellOnRightEdge (index) {
 }
 
 
-function getNeighbours (index) {
+function getNeighboursClassic (index) {
 	let left = !cellOnLeftEdge(index);
 	let right = !cellOnRightEdge(index);
 	let top = !cellOnTopEdge(index);
@@ -107,9 +113,35 @@ function getNeighbours (index) {
 	return neighbours;
 }
 
+function getNeighboursKnight (index) {
+	let x = game.tiles[index].x;
+	let y = game.tiles[index].y;
+
+	let neighbours = [];
+
+	if (isInGrid(x-2, y-1))
+		neighbours.push(toGrid(x-2, y-1));
+	if (isInGrid(x+2, y-1))
+		neighbours.push(toGrid(x+2, y-1));
+	if (isInGrid(x-2, y+1))
+		neighbours.push(toGrid(x-2, y+1));
+	if (isInGrid(x+2, y+1))
+		neighbours.push(toGrid(x+2, y+1));
+	if (isInGrid(x-1, y-2))
+		neighbours.push(toGrid(x-1, y-2));
+	if (isInGrid(x+1, y-2))
+		neighbours.push(toGrid(x+1, y-2));
+	if (isInGrid(x-1, y+2))
+		neighbours.push(toGrid(x-1, y+2));
+	if (isInGrid(x+1, y+2))
+		neighbours.push(toGrid(x+1, y+2));
+
+	return neighbours;
+}
+
 function countNeighouringMines (index) {
 	let count = 0;
-	getNeighbours(index).forEach(i => {
+	game.getNeighbours(index).forEach(i => {
 		count += game.tiles[i].mine ? 1 : 0;
 	});
 	return count;
@@ -117,7 +149,7 @@ function countNeighouringMines (index) {
 
 function countNeighbouringFlags (index) {
 	let count = 0;
-	getNeighbours(index).forEach(i => {
+	game.getNeighbours(index).forEach(i => {
 		count += game.tiles[i].flagged == 1 ? 1 : 0;
 	});
 	return count;
@@ -131,7 +163,7 @@ function revealCell (index) {
 		game.dead = true;
 	} else if (!game.tiles[index].hidden) {
 		if (countNeighouringMines(index) == 0) {
-			getNeighbours(index).forEach(i => {
+			game.getNeighbours(index).forEach(i => {
 				if (!game.tiles[i].revealed)
 					revealCell(i);
 			});
@@ -141,7 +173,7 @@ function revealCell (index) {
 
 function chordCell (index) {
 	if (countNeighbouringFlags(index) == countNeighouringMines(index)) {
-		getNeighbours(index).forEach(i => {
+		game.getNeighbours(index).forEach(i => {
 			if (!game.tiles[i].revealed && game.tiles[i].flagged != 1)
 				revealCell(i);
 		});
@@ -158,7 +190,7 @@ function handleMouse (e) {
 	if (gridIndex != -1 && !game.dead) {
 		if (e.button == 0 && game.firstClick) {
 			game.firstClick = false;
-			let excluded = getNeighbours(gridIndex);
+			let excluded = game.getNeighbours(gridIndex);
 			excluded.push(gridIndex);
 			addMines(game.mines, excluded);
 		}
@@ -221,7 +253,6 @@ function drawGrid (ctx) {
 					let n = countNeighouringMines(cellIndex);
 					ctx.fillText(n ? n : " ", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
 				} else {
-					ctx.fillText("m", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
 					ctx.fillText("🅱️", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
 				}
 			}
@@ -275,11 +306,12 @@ function startGame() {
 	let w = parseInt(document.getElementById("width").value);
 	let h = parseInt(document.getElementById("height").value);
 	let m = parseInt(document.getElementById("mines").value);
-	initGame(w, h, m);
+	let v = document.getElementById("variant").value;
+	initGame(w, h, m, v);
 }
 
 
-function initGame (width, height, mines) {
+function initGame (width, height, mines, variant) {
 	game.width = width;
 	game.height = height;
 	game.mines = mines;
@@ -293,6 +325,16 @@ function initGame (width, height, mines) {
 		for (x=0;x<width;x++) {
 			game.tiles.push(new Tile(x, y));
 		}
+	}
+
+	switch (variant) {
+		case "knight":
+			game.getNeighbours = getNeighboursKnight;
+			break;
+		case "classic":
+		default:
+			game.getNeighbours = getNeighboursClassic;
+			break;
 	}
 
 	canvas.width = display.marginLeft*2 + (display.cellWidth+display.cellPadding)*game.width + display.cellPadding;
