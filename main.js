@@ -222,6 +222,7 @@ function drawGrid (ctx) {
 					ctx.fillText(n ? n : " ", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
 				} else {
 					ctx.fillText("m", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
+					ctx.fillText("🅱️", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
 				}
 			}
 		}
