@@ -234,6 +234,9 @@ function draw () {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+	let remaining = game.mines - game.tiles.filter(t => { return t.flagged == 1; }).length;
+	document.getElementById("minecount").innerHTML = remaining;
+
 	drawBorder(ctx);
 	drawGrid(ctx);
 	if (game.tiles.filter(t => { return t.revealed; }).length == game.width*game.height - game.mines) {
