@@ -188,6 +188,40 @@ function chordCell (index) {
 	}
 }
 
+function flagCell (index) {
+	game.tiles[index].flagged = (game.tiles[index].flagged + 1) % 3;
+}
+
+
+function onMouseDown (e) {
+	e.preventDefault();
+
+	if (game.dead) {
+		draw();
+		return;
+	}
+
+	let index = canvasToGrid(e.offsetX, e.offsetY);
+
+	if (index != -1) {
+		if (e.button == 2 && !game.tiles[index].revealed) {
+			flagCell(index);
+		} else if (e.button == 0 && !game.tiles[index].flagged) {
+			if (game.firstClick) {
+				game.firstClick = false;
+				let excluded = game.getNeighbours(index);
+				excluded.push(index);
+				addMines(game.mines, excluded);
+				revealCell(index);
+			} else if (game.tiles[index].revealed) {
+				chordCell(index);
+			} else {
+				revealCell(index);
+			}
+		}
+	}
+}
+
 
 function handleMouse (e) {
 	e.preventDefault();
@@ -195,23 +229,7 @@ function handleMouse (e) {
 	// if in grid, you Clicked a Cell
 	let gridIndex = canvasToGrid(e.offsetX, e.offsetY);
 
-	if (gridIndex != -1 && !game.dead) {
-		if (e.button == 0 && game.firstClick) {
-			game.firstClick = false;
-			let excluded = game.getNeighbours(gridIndex);
-			excluded.push(gridIndex);
-			addMines(game.mines, excluded);
-		}
-
-		if (e.button == 0 && !game.tiles[gridIndex].flagged) {
-			if (game.tiles[gridIndex].revealed)
-				chordCell(gridIndex);
-			else
-				revealCell(gridIndex);
-		} else if (e.button == 2 && !game.tiles[gridIndex].revealed) {
-			game.tiles[gridIndex].flagged = (game.tiles[gridIndex].flagged + 1) % 3;
-		}
-	}
+	onMouseDown(e);
 
 	draw();
 }
