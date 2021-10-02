@@ -7,7 +7,6 @@ const display = {
 	cellWidth: 32,
 	cellPadding: 4,
 
-	highlightNeighbours: false,
 	highlightTooManyFlags: false,
 	darkenComplete: false
 };
@@ -263,7 +262,11 @@ function drawCell (ctx, index, x, y) {
 	ctx.fillStyle = "white";
 	if (!game.tiles[index].revealed) {
 		if (game.tiles[index].flagged == 0) {
-			ctx.fillStyle = "grey";
+			if (index == game.selected || game.highlighted.includes(index)) {
+				ctx.fillStyle = "dimgrey";
+			} else {
+				ctx.fillStyle = "grey";
+			}
 			fill = true;
 		} else if (game.tiles[index].flagged == 1) {
 			ctx.fillStyle = "red";
@@ -274,9 +277,7 @@ function drawCell (ctx, index, x, y) {
 		}
 	}
 
-	if (display.highlightNeighbours && game.highlighted.includes(index)) {
-		ctx.strokeStyle = "yellow";
-	} else if (display.highlightTooManyFlags && game.tiles[index].revealed && !game.tiles[index].hidden && countNeighbouringFlags(index) > countNeighouringMines(index)) {
+	if (display.highlightTooManyFlags && game.tiles[index].revealed && !game.tiles[index].hidden && countNeighbouringFlags(index) > countNeighouringMines(index)) {
 		ctx.strokeStyle = "red";
 		ctx.fillStyle = "red";
 	} else if (display.darkenComplete && game.tiles[index].revealed && 
@@ -322,7 +323,6 @@ function drawGrid (ctx) {
 
 
 function draw () {
-	display.highlightNeighbours = document.getElementById("highlightNeighbours").checked;
 	display.highlightTooManyFlags = document.getElementById("highlightTooManyFlags").checked;
 	display.darkenComplete = document.getElementById("darkenComplete").checked;
 
