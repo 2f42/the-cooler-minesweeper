@@ -34,7 +34,16 @@
 			</select><br /><br />
 		</form>
 
-		<button onclick="startGame()">Start New Game</button>
+		<button onclick="startGame()">Start New Game</button><br /><br />
+
+		<input type="checkbox" id="highlightNeighbours"  name="highlightNeighbours" onclick="draw()" />
+		<label for="highlightNeighbours">Highlight Neighbours On Click</label><br />
+
+		<input type="checkbox" id="highlightTooManyFlags"  name="highlightTooManyFlags" onclick="draw()" />
+		<label for="highlightTooManyFlags">Highlight Too Many Flags</label><br />
+
+		<input type="checkbox" id="darkenComplete"  name="darkenComplete" onclick="draw()" />
+		<label for="darkenComplete">Darken Completed Cells</label><br />
 
 		<script type="text/javascript" src="main.js"></script>
 

@@ -5,7 +5,11 @@ const display = {
 	marginLeft: 32,
 	marginTop: 32,
 	cellWidth: 32,
-	cellPadding: 4
+	cellPadding: 4,
+
+	highlightNeighbours: false,
+	highlightTooManyFlags: false,
+	darkenComplete: false
 };
 
 const game = {
@@ -19,7 +23,10 @@ const game = {
 
 	tiles: [],
 
-	getNeighbours: getNeighboursClassic
+	getNeighbours: getNeighboursClassic,
+
+	selected: -1,
+	highlighted: []
 };
 
 
@@ -207,38 +214,91 @@ function onMouseDown (e) {
 		if (e.button == 2 && !game.tiles[index].revealed) {
 			flagCell(index);
 		} else if (e.button == 0 && !game.tiles[index].flagged) {
-			if (game.firstClick) {
-				game.firstClick = false;
-				let excluded = game.getNeighbours(index);
-				excluded.push(index);
-				addMines(game.mines, excluded);
-				revealCell(index);
-			} else if (game.tiles[index].revealed) {
-				chordCell(index);
-			} else {
-				revealCell(index);
+			if (game.tiles[index].revealed) {
+				game.highlighted = game.getNeighbours(index);
+				game.highlighted.push(index);
 			}
+			game.selected = index;
 		}
 	}
-}
-
-
-function handleMouse (e) {
-	e.preventDefault();
-
-	// if in grid, you Clicked a Cell
-	let gridIndex = canvasToGrid(e.offsetX, e.offsetY);
-
-	onMouseDown(e);
 
 	draw();
 }
+
+function onMouseUp (e) {
+	e.preventDefault();
+
+	let index = canvasToGrid(e.offsetX, e.offsetY);
+
+	if (e.button == 0 && !game.tiles[index].flagged && index == game.selected) {
+		if (game.firstClick) {
+			game.firstClick = false;
+			let excluded = game.getNeighbours(index);
+			excluded.push(index);
+			addMines(game.mines, excluded);
+			revealCell(index);
+		} else if (game.tiles[index].revealed) {
+			chordCell(index);
+		} else {
+			revealCell(index);
+		}
+	}
+
+	game.highlighted = [];
+	game.selected = -1;
+
+	draw();
+}
+
 
 
 function drawBorder (ctx) {
 	ctx.strokeStyle = "white";
 	let cellSize = display.cellWidth+display.cellPadding;
 	ctx.strokeRect(display.marginLeft, display.marginTop, cellSize*game.width+display.cellPadding, cellSize*game.height+display.cellPadding);
+}
+
+function drawCell (ctx, index, x, y) {
+	let fill = false;
+	ctx.fillStyle = "white";
+	if (!game.tiles[index].revealed) {
+		if (game.tiles[index].flagged == 0) {
+			ctx.fillStyle = "grey";
+			fill = true;
+		} else if (game.tiles[index].flagged == 1) {
+			ctx.fillStyle = "red";
+			fill = true;
+		} else if (game.tiles[index].flagged == 2) {
+			ctx.fillStyle = "green";
+			fill = true;
+		}
+	}
+
+	if (display.highlightNeighbours && game.highlighted.includes(index)) {
+		ctx.strokeStyle = "yellow";
+	} else if (display.highlightTooManyFlags && game.tiles[index].revealed && !game.tiles[index].hidden && countNeighbouringFlags(index) > countNeighouringMines(index)) {
+		ctx.strokeStyle = "red";
+		ctx.fillStyle = "red";
+	} else if (display.darkenComplete && game.tiles[index].revealed && 
+		game.getNeighbours(index).length - game.getNeighbours(index).filter(t => { return game.tiles[t].revealed; }).length == countNeighbouringFlags(index)) {
+		ctx.strokeStyle = "grey";
+		ctx.fillStyle = "grey";
+	} else {
+		ctx.strokeStyle = "grey";
+	}
+	ctx.strokeRect(x, y, display.cellWidth, display.cellWidth);
+
+	if (fill) {
+		ctx.fillRect(x, y, display.cellWidth, display.cellWidth);
+	} else {
+
+		if (!game.tiles[index].mine) {
+			let n = countNeighouringMines(index);
+			ctx.fillText(n ? n : " ", x+display.cellWidth/2, y+display.cellWidth/2);
+		} else {
+			ctx.fillText("🅱️", x+display.cellWidth/2, y+display.cellWidth/2);
+		}
+	}
 }
 
 function drawGrid (ctx) {
@@ -252,42 +312,19 @@ function drawGrid (ctx) {
 		for (let y=0;y<game.height;y++) {
 			let cellY = display.marginTop+display.cellPadding+y*(display.cellWidth+display.cellPadding);
 
-			ctx.strokeRect(cellX, cellY, display.cellWidth, display.cellWidth);
-
 			let cellIndex = toGrid(x, y);
-			let fill = false;
 
-			if (!game.tiles[cellIndex].revealed) {
-				if (game.tiles[cellIndex].flagged == 0) {
-					ctx.fillStyle = "grey";
-					fill = true;
-				} else if (game.tiles[cellIndex].flagged == 1) {
-					ctx.fillStyle = "red";
-					fill = true;
-				} else if (game.tiles[cellIndex].flagged == 2) {
-					ctx.fillStyle = "green";
-					fill = true;
-				}
-			}
-
-			if (fill) {
-				ctx.fillRect(cellX, cellY, display.cellWidth, display.cellWidth);
-			} else {
-				ctx.fillStyle = "white";
-
-				if (!game.tiles[cellIndex].mine) {
-					let n = countNeighouringMines(cellIndex);
-					ctx.fillText(n ? n : " ", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
-				} else {
-					ctx.fillText("🅱️", cellX+display.cellWidth/2, cellY+display.cellWidth/2);
-				}
-			}
+			drawCell(ctx, cellIndex, cellX, cellY);
 		}
 	}
 }
 
 
 function draw () {
+	display.highlightNeighbours = document.getElementById("highlightNeighbours").checked;
+	display.highlightTooManyFlags = document.getElementById("highlightTooManyFlags").checked;
+	display.darkenComplete = document.getElementById("darkenComplete").checked;
+
 	let ctx = canvas.getContext("2d");
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -384,4 +421,5 @@ window.onload = function () {
 
 //window.addEventListener("keypress", e => { display.cellWidth++; window.onload(); });
 canvas.addEventListener("contextmenu", e => { e.preventDefault(); } );
-canvas.addEventListener("mousedown", handleMouse);
+canvas.addEventListener("mousedown", onMouseDown);
+canvas.addEventListener("mouseup", onMouseUp);
