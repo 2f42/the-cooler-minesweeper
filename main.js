@@ -330,7 +330,7 @@ function draw () {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	if (game.tiles.filter(t => { return t.revealed; }).length == game.width*game.height - game.mines) {
+	if (game.tiles.filter(t => { return t.revealed; }).length == game.width*game.height - game.mines && !game.dead) {
 		window.alert("you win?");
 		game.dead = true;
 		game.tiles.forEach(t => {
