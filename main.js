@@ -280,7 +280,8 @@ function drawCell (ctx, index, x, y) {
 		ctx.strokeStyle = "red";
 		ctx.fillStyle = "red";
 	} else if (display.darkenComplete && game.tiles[index].revealed && 
-		game.getNeighbours(index).length - game.getNeighbours(index).filter(t => { return game.tiles[t].revealed; }).length == countNeighbouringFlags(index)) {
+		game.getNeighbours(index).length - game.getNeighbours(index).filter(t => { return game.tiles[t].revealed; }).length == countNeighbouringFlags(index) &&
+		countNeighouringMines(index) == countNeighbouringFlags(index)) {
 		ctx.strokeStyle = "grey";
 		ctx.fillStyle = "grey";
 	} else {
