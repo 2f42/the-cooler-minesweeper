@@ -39,7 +39,7 @@ function Tile (x, y) {
 	this.revealed = false;
 	this.flagged = 0;
 
-	this.adjacent = 0;
+	this.adjacent = -1;
 }
 
 
@@ -147,11 +147,14 @@ function getNeighboursKnight (index) {
 }
 
 function countNeighouringMines (index) {
-	let count = 0;
-	game.getNeighbours(index).forEach(i => {
-		count += game.tiles[i].mine ? 1 : 0;
-	});
-	return count;
+	if (game.tiles[index].adjacent == -1) {
+		let count = 0;
+		game.getNeighbours(index).forEach(i => {
+			count += game.tiles[i].mine ? 1 : 0;
+		});
+		game.tiles[index].adjacent = count;
+	}
+	return game.tiles[index].adjacent;
 }
 
 function countNeighbouringFlags (index) {
@@ -163,6 +166,12 @@ function countNeighbouringFlags (index) {
 }
 
 
+function isCellComplete (index) {
+	let neighbours = game.getNeighbours(index);
+	return game.tiles[index].revealed && 
+		neighbours.length == neighbours.filter(t => { return game.tiles[t].revealed || game.tiles[t].flagged == 1; }).length &&
+		countNeighouringMines(index) == countNeighbouringFlags(index);
+}
 function revealCell (index) {
 	game.tiles[index].revealed = true;
 	if (game.tiles[index].mine) {
@@ -280,9 +289,7 @@ function drawCell (ctx, index, x, y) {
 	if (display.highlightTooManyFlags && game.tiles[index].revealed && !game.tiles[index].hidden && countNeighbouringFlags(index) > countNeighouringMines(index)) {
 		ctx.strokeStyle = "red";
 		ctx.fillStyle = "red";
-	} else if (display.darkenComplete && game.tiles[index].revealed && 
-		game.getNeighbours(index).length == game.getNeighbours(index).filter(t => { return game.tiles[t].revealed || game.tiles[t].flagged; }).length &&
-		countNeighouringMines(index) == countNeighbouringFlags(index)) {
+	} else if (display.darkenComplete && isCellComplete(index)) {
 		ctx.strokeStyle = "grey";
 		ctx.fillStyle = "grey";
 	} else {
@@ -295,8 +302,7 @@ function drawCell (ctx, index, x, y) {
 	} else {
 
 		if (!game.tiles[index].mine) {
-			let n = countNeighouringMines(index);
-			ctx.fillText(n ? n : " ", x+display.cellWidth/2, y+display.cellWidth/2);
+			ctx.fillText(game.tiles[index].adjacent ? game.tiles[index].adjacent : " ", x+display.cellWidth/2, y+display.cellWidth/2);
 		} else {
 			ctx.fillText("🅱️", x+display.cellWidth/2, y+display.cellWidth/2);
 		}
