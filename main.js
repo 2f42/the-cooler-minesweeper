@@ -15,6 +15,7 @@ const game = {
 
 	firstClick: false,
 	dead: true,
+	showOnDeath: true,
 
 	tiles: [],
 
@@ -161,6 +162,13 @@ function revealCell (index) {
 	if (game.tiles[index].mine) {
 		window.alert("oh no YOU're deAD!");
 		game.dead = true;
+		if (game.showOnDeath) {
+			game.tiles.forEach(t => {
+				if (t.mine) {
+					t.revealed = true;
+				}
+			});
+		}
 	} else if (!game.tiles[index].hidden) {
 		if (countNeighouringMines(index) == 0) {
 			game.getNeighbours(index).forEach(i => {
@@ -269,11 +277,18 @@ function draw () {
 	let remaining = game.mines - game.tiles.filter(t => { return t.flagged == 1; }).length;
 	document.getElementById("minecount").innerHTML = remaining;
 
-	drawBorder(ctx);
-	drawGrid(ctx);
 	if (game.tiles.filter(t => { return t.revealed; }).length == game.width*game.height - game.mines) {
 		window.alert("you win?");
+		game.dead = true;
+		game.tiles.forEach(t => {
+			if (t.mine) {
+				t.flagged = 1;
+			}
+		});
 	}
+
+	drawBorder(ctx);
+	drawGrid(ctx);
 }
 
 
@@ -318,6 +333,7 @@ function initGame (width, height, mines, variant) {
 
 	game.firstClick = true;
 	game.dead = false;
+	game.showOnDeath = true;
 
 	game.tiles = [];
 
