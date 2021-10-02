@@ -172,6 +172,8 @@ function isCellComplete (index) {
 		neighbours.length == neighbours.filter(t => { return game.tiles[t].revealed || game.tiles[t].flagged == 1; }).length &&
 		countNeighouringMines(index) == countNeighbouringFlags(index);
 }
+
+
 function revealCell (index) {
 	game.tiles[index].revealed = true;
 	if (game.tiles[index].mine) {
