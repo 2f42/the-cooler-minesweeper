@@ -332,7 +332,7 @@ function drawCell (ctx, index, x, y) {
 
 function drawGrid (ctx) {
 	ctx.strokeStyle = "grey";
-	ctx.font = "30px Arial";
+	ctx.font = "28px Arial";
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 
