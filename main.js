@@ -146,6 +146,25 @@ function getNeighboursKnight (index) {
 	return neighbours;
 }
 
+function getNeighboursWide (index) {
+	let x = game.tiles[index].x;
+	let y = game.tiles[index].y;
+
+	let neighbours = [];
+
+	for (let i=-2;i<3;i++) {
+		for (let j=-2;j<3;j++) {
+			if ((i == 0 && j == 0) || !isInGrid(x+i,y+j)) {
+				continue;
+			} else {
+				neighbours.push(toGrid(x+i,y+j));
+			}
+		}
+	}
+
+	return neighbours;
+}
+
 function countNeighouringMines (index) {
 	if (game.tiles[index].adjacent == -1) {
 		let count = 0;
@@ -408,6 +427,9 @@ function initGame (width, height, mines, variant) {
 	}
 
 	switch (variant) {
+		case "wide":
+			game.getNeighbours = getNeighboursWide;
+			break;
 		case "knight":
 			game.getNeighbours = getNeighboursKnight;
 			break;
