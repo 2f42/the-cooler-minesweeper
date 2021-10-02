@@ -247,9 +247,9 @@ function drawGrid (ctx) {
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 
-	for (x=0;x<game.width;x++) {
+	for (let x=0;x<game.width;x++) {
 		let cellX = display.marginLeft+display.cellPadding+x*(display.cellWidth+display.cellPadding);
-		for (y=0;y<game.height;y++) {
+		for (let y=0;y<game.height;y++) {
 			let cellY = display.marginTop+display.cellPadding+y*(display.cellWidth+display.cellPadding);
 
 			ctx.strokeRect(cellX, cellY, display.cellWidth, display.cellWidth);
@@ -313,7 +313,7 @@ function draw () {
 function addMines (n, excluded) {
 	console.log("adding mines!");
 	let mines = [];
-	for (i=0;i<n;i++) {
+	for (let i=0;i<n;i++) {
 		while (1) {
 			let m = Math.floor(Math.random()*game.width*game.height);
 			if (!mines.includes(m) && !excluded.includes(m)) {
@@ -355,8 +355,8 @@ function initGame (width, height, mines, variant) {
 
 	game.tiles = [];
 
-	for (y=0;y<height;y++) {
-		for (x=0;x<width;x++) {
+	for (let y=0;y<height;y++) {
+		for (let x=0;x<width;x++) {
 			game.tiles.push(new Tile(x, y));
 		}
 	}
