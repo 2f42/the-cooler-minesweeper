@@ -375,24 +375,28 @@ function draw () {
 }
 
 
+function shuffle (list) {
+	for (let i=list.length-1;i>0;i--) {
+		let r = Math.floor(Math.random() * i);
+		let t = list[i];
+		list[i] = list[r];
+		list[r] = t;
+	}
+
+	return list;
+}
+
 function addMines (n, excluded) {
 	console.log("adding mines!");
-	let mines = [];
-	for (let i=0;i<n;i++) {
-		while (1) {
-			let m = Math.floor(Math.random()*game.width*game.height);
-			if (!mines.includes(m) && !excluded.includes(m)) {
-				mines.push(m);
-				break;
-			}
-		}
 
-		if (excluded.length + mines.length >= game.width*game.height) {
-			game.mines = mines.length;
-			window.alert("you chose to put down too many mines, so the total number of mines has gone down (and you will win after clicking once, because what else did you think would happen)");
-			break;
-		}
+	if (excluded.length + n >= game.width * game.height) {
+		n = game.width * game.height - excluded.length;
+		game.mines = n;
+		window.alert("you chose to put down too many mines, so the total number of mines has gone down (and you will win after clicking once, because what else did you think would happen)");
 	}
+
+	let mines = [...Array(game.width * game.height).keys()].filter(i => { return !excluded.includes(i); });
+	mines = shuffle(mines).slice(0, n);
 
 	mines.forEach(m => {
 		game.tiles[m].mine = true;
